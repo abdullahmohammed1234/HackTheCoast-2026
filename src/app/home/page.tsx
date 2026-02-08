@@ -95,13 +95,13 @@ export default function HomePage() {
             </div>
             
             {/* Headline */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 tracking-tight">
-              UBC Student Marketplace
+            <h1 className="text-4xl font-bold text-white mb-4 tracking-tight">
+              Welcome to Exchangify!
             </h1>
             
             {/* Subheadline */}
             <p className="text-xl text-white/90 max-w-2xl mx-auto mb-10">
-              Buy, sell, and trade with fellow UBC students. Sustainable. Local. Trusted.
+              Start exchanging with your fellow UBC students and faculty.
             </p>
 
             {/* Stats */}
