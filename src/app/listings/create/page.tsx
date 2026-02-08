@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { DollarSign, Tag, MapPin, Image as ImageIcon, Save, X, Upload, Clock } from 'lucide-react';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
+import PageHeader from '@/components/PageHeader';
 
 const DRAFT_STORAGE_KEY = 'listing_draft';
 
@@ -177,34 +178,12 @@ export default function CreateListingPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-
-      {/* Draft saved indicator */}
-      {hasDraft && (
-        <div className="fixed bottom-4 right-4 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 text-sm z-50">
-          <Save className="h-4 w-4" />
-          <span>Draft saved</span>
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 pt-16">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-4">
-            <div className="relative w-14 h-14">
-              <Image
-                src="/logo.webp"
-                alt="Exchangify Logo"
-                fill
-                className="object-contain"
-              />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Create New Listing</h1>
-              <p className="text-gray-500">List your item for fellow UBC students</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Create New Listing"
+        description="List your item for fellow UBC students"
+        showBackButton
+        onBack={() => router.back()}
+      />
 
       {/* Form */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

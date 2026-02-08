@@ -8,6 +8,7 @@ import { MessageCircle, Send, ArrowLeft, User } from 'lucide-react';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import Navbar from '@/components/Navbar';
+import PageHeader from '@/components/PageHeader';
 import EmptyState from '@/components/EmptyState';
 import Skeleton from '@/components/Skeleton';
 
@@ -113,52 +114,12 @@ export default function MessagesPage() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-16">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-ubc-blue to-ubc-blue opacity-95" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM2djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="flex items-center justify-between mb-6">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              <span className="hidden sm:inline">Back</span>
-            </button>
-          </div>
-
-          <div className="text-center text-white">
-            <div className="inline-flex items-center justify-center mb-4">
-                <div className="bg-white/10 backdrop-blur-sm p-3 rounded-2xl shadow-lg">
-                  <div className="relative w-10 h-10">
-                    <Image
-                      src="/logo.webp"
-                      alt="Exchangify Logo"
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-              </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-              Messages
-            </h1>
-            <p className="text-lg text-white/90">
-              Connect with fellow UBC students
-            </p>
-          </div>
-        </div>
-
-        {/* Wave Divider */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="white"/>
-          </svg>
-        </div>
-      </section>
+      <PageHeader
+        title="Messages"
+        description="Connect with fellow UBC students"
+        showBackButton
+        onBack={() => router.back()}
+      />
 
       {/* Messages Section */}
       <section className="py-8 bg-white">

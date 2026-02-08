@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { HeartIcon, ArrowLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Navbar from '@/components/Navbar';
+import PageHeader from '@/components/PageHeader';
 import ListingCard from '@/components/ListingCard';
 import EmptyState from '@/components/EmptyState';
 import { SkeletonCard } from '@/components/Skeleton';
@@ -87,27 +88,12 @@ export default function WishlistPage() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-
-      {/* Hero Section */}
-      <section className="relative pt-16 bg-gradient-to-br from-ubc-blue via-ubc-blue to-primary">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex items-center gap-4 mb-6">
-            <button
-              onClick={() => router.back()}
-              className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
-            >
-              <ArrowLeftIcon className="h-6 w-6" />
-            </button>
-            <h1 className="text-3xl font-bold text-white">My Wishlist</h1>
-          </div>
-          <p className="text-white/80 text-lg max-w-2xl">
-            Items you've saved and are interested in. Connect with sellers to make a deal!
-          </p>
-          <div className="mt-4 text-white/60">
-            {wishlist.length} {wishlist.length === 1 ? 'item' : 'items'} saved
-          </div>
-        </div>
-      </section>
+      <PageHeader
+        title="My Wishlist"
+        description={`${wishlist.length} ${wishlist.length === 1 ? 'item' : 'items'} saved`}
+        showBackButton
+        onBack={() => router.back()}
+      />
 
       {/* Wishlist Items */}
       <section className="py-12">

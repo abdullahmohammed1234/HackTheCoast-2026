@@ -13,6 +13,7 @@ import {
   CheckIcon
 } from '@heroicons/react/24/outline';
 import Navbar from '@/components/Navbar';
+import PageHeader from '@/components/PageHeader';
 import EmptyState from '@/components/EmptyState';
 
 interface PriceAlert {
@@ -189,27 +190,12 @@ export default function PriceAlertsPage() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-
-      {/* Hero Section */}
-      <section className="relative pt-16 bg-gradient-to-br from-ubc-blue via-ubc-blue to-primary">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex items-center gap-4 mb-6">
-            <button
-              onClick={() => router.back()}
-              className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
-            >
-              <ArrowLeftIcon className="h-6 w-6" />
-            </button>
-            <h1 className="text-3xl font-bold text-white">Price Alerts</h1>
-          </div>
-          <p className="text-white/80 text-lg max-w-2xl">
-            Get notified when items matching your criteria are posted. Never miss a great deal!
-          </p>
-          <div className="mt-4 text-white/60">
-            {alerts.length} {alerts.length === 1 ? 'alert' : 'alerts'} active
-          </div>
-        </div>
-      </section>
+      <PageHeader
+        title="Price Alerts"
+        description={`${alerts.length} ${alerts.length === 1 ? 'alert' : 'alerts'} active - Get notified when items matching your criteria are posted`}
+        showBackButton
+        onBack={() => router.back()}
+      />
 
       {/* Content Section */}
       <section className="py-12">

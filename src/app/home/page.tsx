@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { MagnifyingGlassIcon, FunnelIcon, ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { CubeIcon, AcademicCapIcon, MapPinIcon, GlobeAltIcon } from '@heroicons/react/24/solid';
 import { SparklesIcon } from '@heroicons/react/24/outline';
@@ -28,6 +30,8 @@ interface Listing {
 }
 
 export default function HomePage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [listings, setListings] = useState<Listing[]>([]);
   const [moveOutMode, setMoveOutMode] = useState(false);
   const [search, setSearch] = useState('');
@@ -40,6 +44,13 @@ export default function HomePage() {
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Redirect to landing page if not authenticated
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/');
+    }
+  }, [status, router]);
+
   // Debounced search
   const debouncedFetchListings = useCallback(() => {
     const timer = setTimeout(() => {
@@ -49,8 +60,9 @@ export default function HomePage() {
   }, [moveOutMode, category, location, condition, dateFrom, dateTo, sortBy]);
 
   useEffect(() => {
+    if (status !== 'authenticated') return;
     debouncedFetchListings();
-  }, [search, moveOutMode, category, location, condition, dateFrom, dateTo, sortBy, debouncedFetchListings]);
+  }, [search, moveOutMode, category, location, condition, dateFrom, dateTo, sortBy, debouncedFetchListings, status]);
 
   const fetchListings = async () => {
     try {
@@ -106,7 +118,7 @@ export default function HomePage() {
         {/* Decorative pattern */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM2djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
           <div className="text-center">
             {/* Logo */}
             <div className="inline-flex items-center justify-center mb-8">

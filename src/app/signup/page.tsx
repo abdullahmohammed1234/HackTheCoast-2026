@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Leaf, Mail, Lock, User, ArrowRight, CheckCircle, XCircle } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, CheckCircle, XCircle } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import PageHeader from '@/components/PageHeader';
 import toast from 'react-hot-toast';
 
 // Password strength criteria
@@ -78,7 +79,7 @@ export default function SignupPage() {
     }
     
     if (!password) {
-      toast.error('Please enter a password');
+      toast.error('Please enter your password');
       return;
     }
     
@@ -117,62 +118,18 @@ export default function SignupPage() {
     }
   };
 
-  const features = [
-    { title: 'Sustainable', desc: 'Reduce waste on campus' },
-    { title: 'Trusted', desc: 'Verified UBC student community' },
-    { title: 'Convenient', desc: 'Easy pickup on campus' }
-  ];
-
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-16">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-ubc-blue to-ubc-blue opacity-95" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM2djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-          <div className="text-center mb-10">
-            {/* Logo */}
-            <div className="inline-flex items-center justify-center mb-6">
-              <div className="ubc-gradient p-3 rounded-xl shadow-lg">
-                <Leaf className="h-10 w-10 text-white" />
-              </div>
-            </div>
-            
-            {/* Headline */}
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 ubc-heading">
-              Join Exchangify
-            </h1>
-            
-            {/* Subheadline */}
-            <p className="text-lg text-white/90 max-w-2xl mx-auto">
-              Create your account and start trading with fellow UBC students
-            </p>
-
-            {/* Features */}
-            <div className="grid grid-cols-3 gap-4 mt-8 max-w-2xl mx-auto">
-              {features.map((feature, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-white font-semibold">{feature.title}</div>
-                  <div className="text-white/70 text-sm">{feature.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Wave Divider */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="white"/>
-          </svg>
-        </div>
-      </section>
+      <PageHeader
+        title="Join Exchangify"
+        description="Create your account and start trading with fellow UBC students"
+        showBackButton
+        onBack={() => router.back()}
+      />
 
       {/* Form Section */}
-      <section className="py-12 bg-white">
+      <section className="py-8 bg-white">
         <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -221,7 +178,7 @@ export default function SignupPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="********"
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
@@ -271,7 +228,7 @@ export default function SignupPage() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="********"
                     className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
                       confirmPassword 
                         ? password === confirmPassword 

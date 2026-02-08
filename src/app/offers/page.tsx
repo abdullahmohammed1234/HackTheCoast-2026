@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { DollarSign, MessageSquare, CheckCircle, X, Clock, Send, ArrowLeft, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import Navbar from '@/components/Navbar';
+import PageHeader from '@/components/PageHeader';
 import Link from 'next/link';
 
 interface Offer {
@@ -113,41 +114,29 @@ export default function OffersPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 pt-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.back()}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5 text-gray-600" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">My Offers</h1>
-              <p className="text-gray-500">Manage your buying and selling offers</p>
-            </div>
-          </div>
-
-          {/* Filter Tabs */}
-          <div className="flex gap-4 mt-6">
+      <PageHeader
+        title="My Offers"
+        description="Manage your buying and selling offers"
+        showBackButton
+        onBack={() => router.back()}
+        action={
+          <div className="flex gap-2">
             {(['all', 'received', 'sent'] as const).map((type) => (
               <button
                 key={type}
                 onClick={() => setFilter(type)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
                   filter === type
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-white text-primary'
+                    : 'bg-white/10 text-white/80 hover:bg-white/20'
                 }`}
               >
-                {type === 'all' ? 'All Offers' : type === 'received' ? 'Offers Received' : 'Offers Sent'}
+                {type === 'all' ? 'All' : type === 'received' ? 'Received' : 'Sent'}
               </button>
             ))}
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Offers List */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
