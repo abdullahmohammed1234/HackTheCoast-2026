@@ -107,6 +107,7 @@ export async function POST(req: NextRequest) {
       location: sanitizeString(rawData.location, { maxLength: 50 }),
       availableDate: rawData.availableDate,
       imageUrl: sanitizeUrl(rawData.imageUrl),
+      imageUrls: rawData.imageUrls || [],
       price: rawData.price,
       isFree: rawData.isFree || false,
       isTrade: rawData.isTrade || false,
@@ -148,6 +149,7 @@ export async function POST(req: NextRequest) {
       location: data.location,
       availableDate: new Date(data.availableDate),
       imageUrl: data.imageUrl,
+      imageUrls: data.imageUrls,
       userId: session.user.id,
       isMoveOutBundle: data.isMoveOutBundle,
     });

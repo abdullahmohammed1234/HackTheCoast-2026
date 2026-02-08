@@ -179,9 +179,9 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {features.map((feature, index) => (
-              <div key={index} className="card-modern p-8 text-center group">
-                <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br ${feature.gradient} mb-6 shadow-lg group-hover:shadow-xl transition-shadow`}>
-                  <feature.icon className="h-10 w-10 text-white" />
+              <div key={index} className="card-modern p-8 flex flex-col items-center text-center group">
+                <div className={`flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br ${feature.gradient} mb-4 shadow-md group-hover:shadow-lg transition-shadow`}>
+                  <feature.icon className="h-7 w-7 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
@@ -241,9 +241,9 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {categories.map((category, index) => (
-              <div key={index} className="card-modern p-6 text-center cursor-pointer group hover:border-primary/30">
-                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${category.gradient} mb-4 shadow-md group-hover:shadow-lg transition-shadow`}>
-                  <category.icon className="h-8 w-8 text-white" />
+              <div key={index} className="card-modern p-5 flex flex-col items-center cursor-pointer group hover:border-primary/30">
+                <div className={`flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${category.gradient} mb-3 shadow-sm group-hover:shadow-md transition-shadow`}>
+                  <category.icon className="h-6 w-6 text-white" />
                 </div>
                 <span className="text-gray-700 font-medium group-hover:text-primary transition-colors">{category.name}</span>
               </div>

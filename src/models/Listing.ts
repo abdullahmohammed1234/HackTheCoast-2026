@@ -10,6 +10,7 @@ export interface IListing extends Document {
   location: string;
   availableDate: Date;
   imageUrl: string;
+  imageUrls: string[];
   userId: mongoose.Types.ObjectId;
   bundleId?: mongoose.Types.ObjectId;
   isMoveOutBundle: boolean;
@@ -57,6 +58,10 @@ const ListingSchema = new Schema<IListing>(
     imageUrl: {
       type: String,
       required: true,
+    },
+    imageUrls: {
+      type: [String],
+      default: [],
     },
     userId: {
       type: Schema.Types.ObjectId,

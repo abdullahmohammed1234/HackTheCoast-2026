@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { MapPin, Calendar, User, ArrowLeft, MessageCircle, Package, Leaf, CheckCircle } from 'lucide-react';
+import { MapPin, Calendar, User, ArrowLeft, MessageCircle, Package, Leaf, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import Navbar from '@/components/Navbar';
 
@@ -18,6 +18,7 @@ interface Listing {
   location: string;
   availableDate: Date;
   imageUrl: string;
+  imageUrls: string[];
   isMoveOutBundle: boolean;
   userId: { _id: string; name: string; email: string };
 }
@@ -29,6 +30,7 @@ export default function ListingDetailPage() {
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     fetchListing();
@@ -130,10 +132,38 @@ export default function ListingDetailPage() {
             <div className="relative w-full md:w-1/2">
               <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl">
                 <img
-                  src={listing.imageUrl}
+                  src={listing.imageUrls && listing.imageUrls.length > 0 ? listing.imageUrls[currentImageIndex] : listing.imageUrl}
                   alt={listing.title}
                   className="w-full h-full object-cover"
                 />
+                {/* Image navigation arrows */}
+                {listing.imageUrls && listing.imageUrls.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setCurrentImageIndex(currentImageIndex === 0 ? listing.imageUrls!.length - 1 : currentImageIndex - 1)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => setCurrentImageIndex(currentImageIndex === listing.imageUrls!.length - 1 ? 0 : currentImageIndex + 1)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                      {listing.imageUrls!.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentImageIndex(index)}
+                          className={`w-2 h-2 rounded-full transition-colors ${
+                            index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
               {listing.isMoveOutBundle && (
                 <div className="absolute top-4 left-4 bg-green-500 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">

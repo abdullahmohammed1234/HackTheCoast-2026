@@ -123,6 +123,7 @@ export default function CreateListingPage() {
     }
 
     try {
+      setLoading(true);
       const res = await fetch('/api/listings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -369,6 +370,20 @@ export default function CreateListingPage() {
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* Available Date */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Available Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.availableDate}
+                  onChange={(e) => setFormData({ ...formData, availableDate: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  required
+                />
               </div>
             </div>
           </div>

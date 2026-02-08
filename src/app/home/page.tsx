@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { CubeIcon, AcademicCapIcon, MapPinIcon, GlobeAltIcon } from '@heroicons/react/24/solid';
 import { SparklesIcon } from '@heroicons/react/24/outline';
@@ -22,6 +22,7 @@ interface Listing {
   location: string;
   availableDate: Date;
   imageUrl: string;
+  imageUrls?: string[];
   isMoveOutBundle: boolean;
   userId?: { name: string };
 }
@@ -34,9 +35,17 @@ export default function HomePage() {
   const [location, setLocation] = useState('all');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchListings();
+  // Debounced search
+  const debouncedFetchListings = useCallback(() => {
+    const timer = setTimeout(() => {
+      fetchListings();
+    }, 300);
+    return () => clearTimeout(timer);
   }, [moveOutMode, category, location]);
+
+  useEffect(() => {
+    debouncedFetchListings();
+  }, [search, moveOutMode, category, location, debouncedFetchListings]);
 
   const fetchListings = async () => {
     try {
