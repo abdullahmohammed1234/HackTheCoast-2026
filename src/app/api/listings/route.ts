@@ -3,8 +3,24 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Listing from '@/models/Listing';
+import { rateLimit, rateLimitConfigs } from '@/lib/rate-limit';
+import { sanitizeString, sanitizeUrl } from '@/lib/sanitize';
 
 export async function GET(req: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResult = rateLimit(req, rateLimitConfigs.api);
+  const response = NextResponse.next();
+  
+  response.headers.set('X-RateLimit-Limit', rateLimitConfigs.api.maxRequests.toString());
+  response.headers.set('X-RateLimit-Remaining', (rateLimitConfigs.api.maxRequests - 1).toString());
+  
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429 }
+    );
+  }
+  
   try {
     await connectDB();
 
@@ -58,6 +74,20 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResult = rateLimit(req, rateLimitConfigs.api);
+  const response = NextResponse.next();
+  
+  response.headers.set('X-RateLimit-Limit', rateLimitConfigs.api.maxRequests.toString());
+  response.headers.set('X-RateLimit-Remaining', (rateLimitConfigs.api.maxRequests - 1).toString());
+  
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const session = await getServerSession(authOptions);
 
@@ -67,12 +97,26 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    const data = await req.json();
+    const rawData = await req.json();
+
+    // Sanitize inputs to prevent XSS attacks
+    const data = {
+      title: sanitizeString(rawData.title, { maxLength: 200, allowSpaces: true }),
+      description: sanitizeString(rawData.description, { maxLength: 3000 }),
+      category: sanitizeString(rawData.category, { maxLength: 50 }),
+      location: sanitizeString(rawData.location, { maxLength: 50 }),
+      availableDate: rawData.availableDate,
+      imageUrl: sanitizeUrl(rawData.imageUrl),
+      price: rawData.price,
+      isFree: rawData.isFree || false,
+      isTrade: rawData.isTrade || false,
+      isMoveOutBundle: rawData.isMoveOutBundle || false,
+    };
 
     // Validate required fields
     const requiredFields = ['title', 'description', 'category', 'location', 'availableDate', 'imageUrl'];
     for (const field of requiredFields) {
-      if (!data[field]) {
+      if (!data[field as keyof typeof data]) {
         return NextResponse.json({ error: `${field} is required` }, { status: 400 });
       }
     }
@@ -98,14 +142,14 @@ export async function POST(req: NextRequest) {
       title: data.title,
       description: data.description,
       price: data.price ? parseFloat(data.price) : null,
-      isFree: data.isFree || false,
-      isTrade: data.isTrade || false,
+      isFree: data.isFree,
+      isTrade: data.isTrade,
       category: data.category,
       location: data.location,
       availableDate: new Date(data.availableDate),
       imageUrl: data.imageUrl,
       userId: session.user.id,
-      isMoveOutBundle: data.isMoveOutBundle || false,
+      isMoveOutBundle: data.isMoveOutBundle,
     });
 
     await listing.populate('userId', 'name email');

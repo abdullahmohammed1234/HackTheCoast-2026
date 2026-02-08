@@ -8,7 +8,13 @@ export interface IUser {
   createdAt: Date;
 }
 
-const UserSchema = new Schema<IUser>(
+interface IUserMethods {
+  comparePassword(candidatePassword: string): Promise<boolean>;
+}
+
+type UserModel = Model<IUser, {}, IUserMethods>;
+
+const UserSchema = new Schema<IUser, UserModel>(
   {
     email: {
       type: String,
@@ -45,6 +51,6 @@ UserSchema.methods.comparePassword = async function (candidatePassword: string):
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+const User: UserModel = mongoose.models.User || mongoose.model<IUser, UserModel>('User', UserSchema);
 
 export default User;

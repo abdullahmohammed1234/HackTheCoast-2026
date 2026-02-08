@@ -3,8 +3,24 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Message from '@/models/Message';
+import { rateLimit, rateLimitConfigs } from '@/lib/rate-limit';
+import { sanitizeString } from '@/lib/sanitize';
 
 export async function GET(req: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResult = rateLimit(req, rateLimitConfigs.api);
+  const response = NextResponse.next();
+  
+  response.headers.set('X-RateLimit-Limit', rateLimitConfigs.api.maxRequests.toString());
+  response.headers.set('X-RateLimit-Remaining', (rateLimitConfigs.api.maxRequests - 1).toString());
+  
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const session = await getServerSession(authOptions);
 
@@ -49,6 +65,20 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResult = rateLimit(req, rateLimitConfigs.api);
+  const response = NextResponse.next();
+  
+  response.headers.set('X-RateLimit-Limit', rateLimitConfigs.api.maxRequests.toString());
+  response.headers.set('X-RateLimit-Remaining', (rateLimitConfigs.api.maxRequests - 1).toString());
+  
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const session = await getServerSession(authOptions);
 
@@ -58,13 +88,29 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    const { receiverId, listingId, content } = await req.json();
+    const rawData = await req.json();
+
+    // Sanitize inputs to prevent XSS attacks
+    const data = {
+      receiverId: sanitizeString(rawData.receiverId, { maxLength: 50 }),
+      listingId: sanitizeString(rawData.listingId, { maxLength: 50 }),
+      content: sanitizeString(rawData.content, { maxLength: 2000 }),
+    };
+
+    // Validate required fields
+    if (!data.receiverId) {
+      return NextResponse.json({ error: 'Receiver ID is required' }, { status: 400 });
+    }
+
+    if (!data.content) {
+      return NextResponse.json({ error: 'Message content is required' }, { status: 400 });
+    }
 
     const message = await Message.create({
       senderId: session.user.id,
-      receiverId,
-      listingId,
-      content,
+      receiverId: data.receiverId,
+      listingId: data.listingId || null,
+      content: data.content,
     });
 
     await message.populate('senderId', 'name email');

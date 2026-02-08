@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
 import { Toaster } from 'react-hot-toast';
+import SessionTimeout from '@/components/SessionTimeout';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,6 +22,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           <Toaster position="top-right" />
+          <SessionTimeout />
           <div className="min-h-screen bg-white">
             {children}
           </div>

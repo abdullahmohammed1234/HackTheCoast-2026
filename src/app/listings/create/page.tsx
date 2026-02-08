@@ -280,6 +280,31 @@ export default function CreateListingPage() {
                     ))}
                   </div>
                 )}
+
+                {/* Add more images button */}
+                {imageUrls.length > 0 && imageUrls.length < 5 && (
+                  <div className="flex items-center gap-4">
+                    <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-xl hover:border-primary hover:bg-gray-50 transition-colors">
+                      <Upload className="h-5 w-5 text-gray-400" />
+                      <span className="text-gray-600 font-medium">Add more images</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        disabled={uploading}
+                      />
+                    </label>
+                    <span className="text-sm text-gray-500">{imageUrls.length}/5 images</span>
+                    {uploading && (
+                      <div className="flex items-center gap-2 text-gray-500">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
+                        <span>Uploading...</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

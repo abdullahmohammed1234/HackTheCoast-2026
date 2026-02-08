@@ -15,9 +15,13 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function Navbar() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  
+  // Ensure session is properly cleared when not authenticated
+  const isAuthenticated = status === 'authenticated' && session?.user;
+  const isLoading = status === 'loading';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,7 +58,13 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
-            {session ? (
+            {/* Show loading state */}
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
+                <div className="w-20 h-4 bg-gray-200 rounded animate-pulse" />
+              </div>
+            ) : isAuthenticated ? (
               <>
                 <Link
                   href="/listings/create"
@@ -108,6 +118,7 @@ export default function Navbar() {
                 </Link>
               </>
             )}
+            {/* End of auth check */}
           </div>
 
           {/* Mobile Menu Button */}
@@ -130,7 +141,16 @@ export default function Navbar() {
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 shadow-lg">
           <div className="px-4 py-4 space-y-2">
-            {session ? (
+            {/* Show loading state */}
+            {isLoading ? (
+              <div className="flex items-center gap-3 px-4 py-4">
+                <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse" />
+                <div className="space-y-2">
+                  <div className="w-24 h-4 bg-gray-200 rounded animate-pulse" />
+                  <div className="w-32 h-3 bg-gray-200 rounded animate-pulse" />
+                </div>
+              </div>
+            ) : isAuthenticated ? (
               <>
                 {/* User Info */}
                 <div className="flex items-center gap-3 px-4 py-4 bg-gradient-to-r from-ubc-blue/5 to-primary/5 rounded-xl mb-4">
@@ -204,6 +224,7 @@ export default function Navbar() {
                 </Link>
               </>
             )}
+            {/* End of auth check */}
           </div>
         </div>
       )}
