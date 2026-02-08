@@ -8,6 +8,7 @@ export interface IListing extends Document {
   isTrade: boolean;
   category: string;
   location: string;
+  condition: string;
   availableDate: Date;
   imageUrl: string;
   imageUrls: string[];
@@ -72,6 +73,11 @@ const ListingSchema = new Schema<IListing>(
       type: Schema.Types.ObjectId,
       ref: 'Bundle',
       default: undefined,
+    },
+    condition: {
+      type: String,
+      enum: ['new', 'like-new', 'good', 'fair', 'used'],
+      default: 'good',
     },
     isMoveOutBundle: {
       type: Boolean,

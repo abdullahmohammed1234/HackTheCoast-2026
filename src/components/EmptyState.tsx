@@ -7,16 +7,18 @@ import {
   MagnifyingGlassIcon,
   HeartIcon,
   ShoppingBagIcon,
+  BellIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
 interface EmptyStateProps {
-  type?: 'listings' | 'messages' | 'search' | 'favorites' | 'default';
+  type?: 'listings' | 'messages' | 'search' | 'favorites' | 'alerts' | 'default';
   title?: string;
   description?: string;
   actionLabel?: string;
   actionHref?: string;
+  actionOnClick?: () => void;
 }
 
 export default function EmptyState({
@@ -25,6 +27,7 @@ export default function EmptyState({
   description,
   actionLabel,
   actionHref,
+  actionOnClick,
 }: EmptyStateProps): ReactNode {
   const getIcon = () => {
     const iconClass = "h-20 w-20 text-gray-200";
@@ -37,6 +40,8 @@ export default function EmptyState({
         return <MagnifyingGlassIcon className={iconClass} />;
       case 'favorites':
         return <HeartIcon className={iconClass} />;
+      case 'alerts':
+        return <BellIcon className={iconClass} />;
       default:
         return <ShoppingBagIcon className={iconClass} />;
     }
@@ -47,6 +52,7 @@ export default function EmptyState({
     messages: 'No messages yet',
     search: 'No results found',
     favorites: 'No favorites yet',
+    alerts: 'No price alerts yet',
     default: 'Nothing here yet',
   };
 
@@ -55,6 +61,7 @@ export default function EmptyState({
     messages: 'Start a conversation by reaching out on a listing you like.',
     search: 'Try adjusting your search or filters to find what you\'re looking for.',
     favorites: 'Save items you love by clicking the heart icon on any listing.',
+    alerts: 'Create alerts to get notified when items matching your criteria are posted.',
     default: 'Get started by exploring our marketplace.',
   };
 
@@ -75,14 +82,24 @@ export default function EmptyState({
         {description || defaultDescriptions[type]}
       </p>
       
-      {actionLabel && actionHref && (
-        <Link
-          href={actionHref}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-ubc-blue to-primary text-white font-semibold rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
-        >
-          {actionLabel}
-          <ArrowRightIcon className="h-5 w-5" />
-        </Link>
+      {actionLabel && (actionHref || actionOnClick) && (
+        actionHref ? (
+          <Link
+            href={actionHref}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-ubc-blue to-primary text-white font-semibold rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+          >
+            {actionLabel}
+            <ArrowRightIcon className="h-5 w-5" />
+          </Link>
+        ) : (
+          <button
+            onClick={actionOnClick}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-ubc-blue to-primary text-white font-semibold rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+          >
+            {actionLabel}
+            <ArrowRightIcon className="h-5 w-5" />
+          </button>
+        )
       )}
     </div>
   );

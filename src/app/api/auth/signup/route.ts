@@ -22,15 +22,15 @@ export async function POST(req: NextRequest) {
   try {
     await connectDB();
 
-    const { rawName, rawEmail, rawPassword } = await req.json();
+    const { name, email, password } = await req.json();
 
     // Sanitize inputs to prevent XSS attacks
-    const name = sanitizeString(rawName, { maxLength: 100, allowSpaces: true });
-    const email = sanitizeEmail(rawEmail);
-    const password = sanitizeString(rawPassword, { maxLength: 100 });
+    const sanitizedName = sanitizeString(name, { maxLength: 100, allowSpaces: true });
+    const sanitizedEmail = sanitizeEmail(email);
+    const sanitizedPassword = sanitizeString(password, { maxLength: 100 });
 
     // Validate UBC email
-    if (!email || !email.endsWith('@student.ubc.ca')) {
+    if (!sanitizedEmail || !sanitizedEmail.endsWith('@student.ubc.ca')) {
       return NextResponse.json(
         { error: 'Only @student.ubc.ca emails are allowed. CWL SSO mocked for hackathon.' },
         { status: 400 }
@@ -38,16 +38,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: sanitizedEmail });
     if (existingUser) {
       return NextResponse.json({ error: 'User already exists' }, { status: 400 });
     }
 
     // Create user
     const user = await User.create({
-      name,
-      email,
-      password,
+      name: sanitizedName,
+      email: sanitizedEmail,
+      password: sanitizedPassword,
     });
 
     return NextResponse.json(

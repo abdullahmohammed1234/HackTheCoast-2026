@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
-import { User, Settings, ShoppingBag, CreditCard, AlertCircle, ArrowLeft, Leaf, Package } from 'lucide-react';
+import { User, Settings, ShoppingBag, CreditCard, AlertCircle, ArrowLeft, Leaf, Package, HeartIcon, BellIcon } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 
@@ -253,6 +253,20 @@ export default function ProfilePage() {
                   Settings
                 </h2>
                 <div className="space-y-3">
+                  <Link 
+                    href="/wishlist"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
+                  >
+                    <HeartIcon className="h-5 w-5 text-white/80 group-hover:text-white transition-colors" />
+                    <span className="flex-1 text-left">My Wishlist</span>
+                  </Link>
+                  <Link 
+                    href="/price-alerts"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
+                  >
+                    <BellIcon className="h-5 w-5 text-white/80 group-hover:text-white transition-colors" />
+                    <span className="flex-1 text-left">Price Alerts</span>
+                  </Link>
                   <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group">
                     <Settings className="h-5 w-5 text-white/80 group-hover:text-white transition-colors" />
                     <span className="flex-1 text-left">Update Profile</span>

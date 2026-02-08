@@ -109,7 +109,7 @@ export default function SignupPage() {
       }
 
       toast.success('Account created successfully!');
-      router.push('/home?registered=true');
+      router.push('/login?registered=true');
     } catch (err) {
       toast.error('Something went wrong. Please try again.');
     } finally {
