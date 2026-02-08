@@ -1,58 +1,105 @@
 'use client';
 
-import { User, Settings, ShoppingBag, BookOpen, Calculator, Coffee, Backpack, Bike, CreditCard, Bell, Lock, UserCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useSession, signIn } from 'next-auth/react';
+import { User, Settings, ShoppingBag, CreditCard, AlertCircle } from 'lucide-react';
 
-// Mock user data
-const mockUser = {
-  name: 'Sarah Chen',
-  university: 'UBC',
-  bio: "Hello! I'm a third-year Environmental Science major with a passion for sustainability. Looking to find new homes for my pre-loved items.",
-  avatar: '/api/placeholder/100/100',
-};
+interface Listing {
+  id: string;
+  title: string;
+  description: string;
+  price: number | null;
+  isFree: boolean;
+  category: string;
+  imageUrl: string;
+  isMoveOutBundle: boolean;
+}
 
-// Mock items for sale
-const mockItemsForSale = [
-  {
-    id: 1,
-    name: 'Reusable Water Bottle',
-    price: 10,
-    icon: Coffee,
-    color: 'bg-emerald-100 text-emerald-700',
-  },
-  {
-    id: 2,
-    name: 'Graphing Calculator',
-    price: 50,
-    icon: Calculator,
-    color: 'bg-blue-100 text-blue-700',
-  },
-  {
-    id: 3,
-    name: 'Textbooks (BIOL 200 & CHEM 250)',
-    price: 40,
-    icon: BookOpen,
-    color: 'bg-amber-100 text-amber-700',
-  },
-];
-
-// Mock purchase history
-const mockPurchaseHistory = [
-  { id: 1, name: 'Bicycle', price: 150 },
-  { id: 2, name: 'ECON 101 Textbook', price: 35 },
-  { id: 3, name: 'Backpack', price: 25 },
-  { id: 4, name: 'Coffee Maker', price: 30 },
-];
-
-// Mock settings
-const mockSettings = [
-  { id: 1, label: 'Update Profile', icon: UserCircle },
-  { id: 2, label: 'Change Password', icon: Lock },
-  { id: 3, label: 'Manage Notifications', icon: Bell },
-];
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
 
 export default function ProfilePage() {
+  const { data: session, status } = useSession();
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      setLoading(false);
+      return;
+    }
+
+    if (status === 'authenticated' && session?.user?.id) {
+      fetchProfile();
+    }
+  }, [status, session]);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch('/api/profile');
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+      const data = await response.json();
+      setUser(data.user);
+      setListings(data.listings);
+    } catch (err) {
+      setError('Failed to load profile data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (status === 'loading' || loading) {
+    return (
+      <div className="min-h-screen ubc-gradient-subtle flex items-center justify-center">
+        <div className="bg-white rounded-3xl p-8 shadow-xl">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ubc-blue mx-auto"></div>
+          <p className="text-gray-600 mt-4 text-center">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === 'unauthenticated') {
+    return (
+      <div className="min-h-screen ubc-gradient-subtle flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl p-8 shadow-xl max-w-md w-full text-center">
+          <div className="w-20 h-20 bg-ubc-blue rounded-full flex items-center justify-center mx-auto mb-6">
+            <User className="w-10 h-10 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold text-ubc-blue mb-4">Sign In Required</h1>
+          <p className="text-gray-600 mb-6">
+            Please sign in to view your profile and manage your listings.
+          </p>
+          <button
+            onClick={() => signIn()}
+            className="w-full bg-ubc-blue text-white py-3 px-6 rounded-xl font-semibold hover:bg-ubc-blue/90 transition-colors"
+          >
+            Sign In
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen ubc-gradient-subtle">
+      {error && (
+        <div className="max-w-4xl mx-auto pt-4 px-4">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3 text-red-700">
+            <AlertCircle className="w-5 h-5" />
+            <p>{error}</p>
+          </div>
+        </div>
+      )}
+
       {/* Top Profile Card */}
       <div className="max-w-4xl mx-auto pt-8 px-4">
         <div className="bg-white rounded-3xl p-8 shadow-xl shadow-black/10 border border-gray-200">
@@ -65,14 +112,21 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="absolute -bottom-1 -right-1 bg-ubc-red text-white text-xs px-2 py-0.5 rounded-full font-medium border-2 border-white">
-                {mockUser.university}
+                UBC
               </div>
             </div>
 
             {/* User Info */}
             <div className="text-center md:text-left flex-1">
-              <h1 className="text-3xl font-bold text-ubc-blue mb-2">{mockUser.name}</h1>
-              <p className="text-gray-600 leading-relaxed max-w-xl">{mockUser.bio}</p>
+              <h1 className="text-3xl font-bold text-ubc-blue mb-2">
+                {user?.name || 'Student'}
+              </h1>
+              <p className="text-gray-600 leading-relaxed max-w-xl">
+                {user?.email || ''}
+              </p>
+              <p className="text-gray-500 text-sm mt-2">
+                Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : new Date().getFullYear()}
+              </p>
             </div>
           </div>
         </div>
@@ -86,26 +140,51 @@ export default function ProfilePage() {
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
               <h2 className="text-xl font-semibold text-ubc-blue mb-6 flex items-center gap-2">
                 <ShoppingBag className="w-5 h-5" />
-                Items for Sale
+                My Listings ({listings.length})
               </h2>
 
-              {/* Item Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {mockItemsForSale.map((item) => (
-                  <div
-                    key={item.id}
-                    className="group bg-ubc-grayLight rounded-xl p-4 shadow-md border border-gray-200 hover:shadow-lg hover:border-ubc-blue/30 transition-all duration-300 cursor-pointer"
+              {listings.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <ShoppingBag className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>You haven't listed any items yet</p>
+                  <a
+                    href="/listings/create"
+                    className="text-ubc-blue hover:underline mt-2 inline-block"
                   >
-                    <div className="flex flex-col items-center text-center">
-                      <div className={`w-16 h-16 rounded-full ${item.color} flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-300`}>
-                        <item.icon className="w-8 h-8" />
+                    Create your first listing
+                  </a>
+                </div>
+              ) : (
+                /* Item Cards Grid */
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {listings.map((item) => (
+                    <div
+                      key={item.id}
+                      className="group bg-ubc-grayLight rounded-xl p-4 shadow-md border border-gray-200 hover:shadow-lg hover:border-ubc-blue/30 transition-all duration-300 cursor-pointer"
+                    >
+                      <div className="flex flex-col items-center text-center">
+                        <div className="w-16 h-16 rounded-full bg-ubc-blue/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-300">
+                          {item.imageUrl ? (
+                            <img
+                              src={item.imageUrl}
+                              alt={item.title}
+                              className="w-full h-full rounded-full object-cover"
+                            />
+                          ) : (
+                            <ShoppingBag className="w-8 h-8 text-ubc-blue" />
+                          )}
+                        </div>
+                        <h3 className="font-medium text-gray-800 text-sm mb-1 line-clamp-2">
+                          {item.title}
+                        </h3>
+                        <p className="text-lg font-bold text-ubc-blue">
+                          {item.isFree ? 'Free' : item.price ? `$${item.price}` : 'N/A'}
+                        </p>
                       </div>
-                      <h3 className="font-medium text-gray-800 text-sm mb-1 line-clamp-2">{item.name}</h3>
-                      <p className="text-lg font-bold text-ubc-blue">${item.price}</p>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -118,15 +197,14 @@ export default function ProfilePage() {
               </h2>
 
               <div className="space-y-2">
-                {mockSettings.map((setting) => (
-                  <button
-                    key={setting.id}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group"
-                  >
-                    <setting.icon className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
-                    <span className="flex-1 text-left">{setting.label}</span>
-                  </button>
-                ))}
+                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group">
+                  <Settings className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
+                  <span className="flex-1 text-left">Update Profile</span>
+                </button>
+                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-200 group">
+                  <CreditCard className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
+                  <span className="flex-1 text-left">Purchase History</span>
+                </button>
               </div>
             </div>
           </div>
@@ -140,16 +218,9 @@ export default function ProfilePage() {
               Purchase History
             </h2>
 
-            <div className="space-y-3">
-              {mockPurchaseHistory.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between py-3 px-4 rounded-xl bg-ubc-grayLight hover:bg-gray-200 transition-all duration-200"
-                >
-                  <span className="text-gray-800 font-medium">{item.name}</span>
-                  <span className="text-ubc-red font-semibold">-${item.price}</span>
-                </div>
-              ))}
+            <div className="text-center py-8 text-gray-500">
+              <CreditCard className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>No purchases yet</p>
             </div>
           </div>
         </div>
