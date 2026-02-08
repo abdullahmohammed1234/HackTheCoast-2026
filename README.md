@@ -1,4 +1,4 @@
-# DormLoop - UBC Student Marketplace
+# Exchangify - UBC Student Marketplace
 
 A UBC-only marketplace where students can buy, sell, and trade dorm items and student essentials during move-in and move-out seasons.
 
@@ -21,7 +21,7 @@ A UBC-only marketplace where students can buy, sell, and trade dorm items and st
 ## 📁 Project Structure
 
 ```
-dormloop/
+Exchangify/
 ├── src/
 │   ├── app/
 │   │   ├── api/
@@ -74,10 +74,10 @@ npm install
 
 ### 2. Configure Environment Variables
 
-Copy `.env.example` to `.env` and fill in your values:
+Copy `.env` and fill in your values:
 
 ```bash
-cp .env.example .env
+cp .env
 ```
 
 Required environment variables:
@@ -95,35 +95,6 @@ npm run dev
 ```
 
 Visit `http://localhost:3000`
-
-## 🔐 Demo Credentials
-
-After running the seed script, you can log in with any of these demo accounts:
-
-| Email | Password |
-|-------|----------|
-| alex.chen@student.ubc.ca | password123 |
-| sarah.j@student.ubc.ca | password123 |
-| mike.w@student.ubc.ca | password123 |
-| emma.d@student.ubc.ca | password123 |
-
-## 🌱 Seeding Demo Data
-
-To populate the database with demo listings:
-
-```bash
-# Start the server, then visit:
-http://localhost:3000/api/seed
-```
-
-Or use curl:
-```bash
-curl http://localhost:3000/api/seed
-```
-
-This will create:
-- 4 demo users with UBC student emails
-- 12 pre-populated listings across different categories
 
 ## 🎤 Demo Flow for Judges
 

@@ -16,7 +16,7 @@ export default function Navbar() {
               <div className="ubc-gradient p-2 rounded-lg shadow-sm">
                 <Leaf className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-white ubc-heading">DormLoop</span>
+              <span className="text-xl font-bold text-white ubc-heading">Exchangify</span>
             </Link>
           </div>
 

@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'DormLoop - UBC Student Marketplace',
+  title: 'Exchangify - UBC Student Marketplace',
   description: 'Buy, sell, and trade dorm items with fellow UBC students. Sustainable campus marketplace.',
 };
 
