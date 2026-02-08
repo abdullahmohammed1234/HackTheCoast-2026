@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Offer from '@/models/Offer';
 import Listing from '@/models/Listing';
+import User from '@/models/User';
+import { sendOfferNotification } from '@/lib/notifications';
 
 // GET all offers for the current user (as buyer or seller)
 export async function GET(req: NextRequest) {
@@ -101,6 +103,18 @@ export async function POST(req: NextRequest) {
     });
 
     await offer.save();
+
+    // Send notification to seller
+    const sellerUser = await User.findById(listing.userId);
+    if (sellerUser && sellerUser.notificationPreferences?.offerNotifications) {
+      sendOfferNotification(
+        listing.userId.toString(),
+        offeredPrice,
+        listing.title,
+        offer._id.toString(),
+        listingId
+      ).catch(console.error);
+    }
 
     return NextResponse.json({ offer, message: 'Offer submitted successfully' }, { status: 201 });
   } catch (error) {

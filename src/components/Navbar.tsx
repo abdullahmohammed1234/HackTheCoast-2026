@@ -22,10 +22,25 @@ export default function Navbar() {
   const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
   
   // Ensure session is properly cleared when not authenticated
   const isAuthenticated = status === 'authenticated' && session?.user;
   const isLoading = status === 'loading';
+
+  // Fetch user avatar when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetch('/api/profile')
+        .then(res => res.json())
+        .then(data => {
+          if (data.user?.avatar) {
+            setUserAvatar(data.user.avatar);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -118,9 +133,17 @@ export default function Navbar() {
                     href="/profile"
                     className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-ubc-blue hover:bg-ubc-blue/5 rounded-xl transition-colors"
                   >
-                    <div className="w-8 h-8 bg-gradient-to-br from-ubc-blue to-primary rounded-full flex items-center justify-center">
-                      <UserCircleIcon className="h-5 w-5 text-white" />
-                    </div>
+                    {userAvatar ? (
+                      <img
+                        src={userAvatar}
+                        alt={session.user?.name || 'User'}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-gradient-to-br from-ubc-blue to-primary rounded-full flex items-center justify-center">
+                        <UserCircleIcon className="h-5 w-5 text-white" />
+                      </div>
+                    )}
                     <span className="text-sm font-medium">
                       {session.user?.name?.split(' ')[0]}
                     </span>
@@ -186,9 +209,17 @@ export default function Navbar() {
               <>
                 {/* User Info */}
                 <div className="flex items-center gap-3 px-4 py-4 bg-gradient-to-r from-ubc-blue/5 to-primary/5 rounded-xl mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-ubc-blue to-primary rounded-full flex items-center justify-center">
-                    <UserCircleIcon className="h-7 w-7 text-white" />
-                  </div>
+                  {userAvatar ? (
+                    <img
+                      src={userAvatar}
+                      alt={session.user?.name || 'User'}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-gradient-to-br from-ubc-blue to-primary rounded-full flex items-center justify-center">
+                      <UserCircleIcon className="h-7 w-7 text-white" />
+                    </div>
+                  )}
                   <div>
                     <p className="text-gray-900 font-semibold">{session.user?.name}</p>
                     <p className="text-gray-500 text-sm">{session.user?.email}</p>

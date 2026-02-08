@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
-import { User, Settings, ShoppingBag, CreditCard, AlertCircle, ArrowLeft, Leaf, Package, HeartIcon, BellIcon } from 'lucide-react';
+import { User, Settings, ShoppingBag, CreditCard, AlertCircle, ArrowLeft, Package, HeartIcon, BellIcon, Award } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import BadgeDisplay from '@/components/BadgeDisplay';
+import BadgeDisplay, { BadgeCollection } from '@/components/BadgeDisplay';
+import AvatarUpload from '@/components/AvatarUpload';
 import StarRating from '@/components/StarRating';
 import ReviewList from '@/components/ReviewList';
 import FavoriteButton from '@/components/FavoriteButton';
+import SustainabilityDashboard from '@/components/SustainabilityDashboard';
 
 interface Listing {
   id: string;
@@ -25,6 +27,7 @@ interface UserProfile {
   id: string;
   name: string;
   email: string;
+  avatar?: string;
   createdAt: string;
   badges: string[];
   rating: number;
@@ -38,6 +41,7 @@ interface UserProfile {
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(null);
   const [listings, setListings] = useState<Listing[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [averageRating, setAverageRating] = useState(0);
@@ -65,6 +69,7 @@ export default function ProfilePage() {
       }
       const data = await response.json();
       setUser(data.user);
+      setAvatar(data.user.avatar || null);
       setListings(data.listings);
       
       // Fetch reviews for the user
@@ -90,12 +95,16 @@ export default function ProfilePage() {
     }
   };
 
+  const handleAvatarUpdate = (newAvatar: string) => {
+    setAvatar(newAvatar);
+  };
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="ubc-gradient p-4 rounded-2xl shadow-lg inline-block mb-4">
-            <Leaf className="h-12 w-12 text-white animate-pulse" />
+            <Package className="h-12 w-12 text-white animate-pulse" />
           </div>
           <p className="text-gray-600 mt-4">Loading profile...</p>
         </div>
@@ -150,23 +159,18 @@ export default function ProfilePage() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-16">
+      <section className="relative overflow-hidden pt-20 pb-32">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-ubc-blue to-ubc-blue opacity-95" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM2djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="flex flex-col md:flex-row items-center gap-6 text-white">
             {/* Profile Avatar */}
-            <div className="relative">
-              <div className="w-28 h-28 rounded-full bg-white p-1 shadow-xl">
-                <div className="w-full h-full rounded-full bg-white/20 flex items-center justify-center">
-                  <User className="w-14 h-14 text-white" />
-                </div>
-              </div>
-              <div className="absolute -bottom-1 -right-1 bg-primary text-white text-xs px-3 py-1 rounded-full font-medium border-2 border-white">
-                UBC
-              </div>
-            </div>
+            <AvatarUpload
+              currentAvatar={avatar || undefined}
+              onAvatarUpdate={handleAvatarUpdate}
+              size="lg"
+            />
 
             {/* User Info */}
             <div className="text-center md:text-left">
@@ -177,7 +181,7 @@ export default function ProfilePage() {
               {/* Badges */}
               {user?.badges && user.badges.length > 0 && (
                 <div className="mb-2">
-                  <BadgeDisplay badges={user.badges} size="sm" showLabels />
+                  <BadgeDisplay badges={user.badges} size="sm" />
                 </div>
               )}
               
@@ -305,7 +309,7 @@ export default function ProfilePage() {
                             <div className="flex-1 min-w-0">
                               <h3 className="font-medium text-gray-900 truncate">{item.title}</h3>
                               <p className="text-lg font-bold text-primary">
-                                {item.isFree ? 'Free' : item.price ? `${item.price}` : 'N/A'}
+                                {item.isFree ? 'Free' : item.price ? `$${item.price}` : 'N/A'}
                               </p>
                               <p className="text-sm text-gray-500">{item.category}</p>
                             </div>
@@ -382,30 +386,18 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Quick Stats */}
-              <div className="mt-6 bg-green-50 rounded-2xl p-6 border border-green-200">
+              {/* Sustainability Dashboard */}
+              <div className="mt-6">
+                <SustainabilityDashboard userId={user?.id} showDetails={true} />
+              </div>
+
+              {/* Full Badge Collection */}
+              <div className="mt-6 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <Leaf className="h-5 w-5 text-green-600" />
-                  Your Impact
+                  <Award className="h-5 w-5 text-amber-500" />
+                  Badge Collection
                 </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Items listed</span>
-                    <span className="font-semibold text-gray-900">{listings.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Items traded</span>
-                    <span className="font-semibold text-gray-900">{user?.totalSales || 0}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Sustainable items</span>
-                    <span className="font-semibold text-green-600">{user?.sustainableListings || 0}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Reviews received</span>
-                    <span className="font-semibold text-gray-900">{user?.reviewCount || 0}</span>
-                  </div>
-                </div>
+                <BadgeCollection earnedBadges={user?.badges || []} />
               </div>
             </div>
           </div>

@@ -3,8 +3,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Message from '@/models/Message';
+import User from '@/models/User';
 import { rateLimit, rateLimitConfigs } from '@/lib/rate-limit';
 import { sanitizeString } from '@/lib/sanitize';
+import { sendNewMessageNotification } from '@/lib/notifications';
 
 export async function GET(req: NextRequest) {
   // Apply rate limiting
@@ -116,6 +118,23 @@ export async function POST(req: NextRequest) {
     await message.populate('senderId', 'name email');
     await message.populate('receiverId', 'name email');
     await message.populate('listingId', 'title');
+
+    // Send push notification to receiver
+    const senderName = (message.senderId as any).name || 'Someone';
+    const messageId = message._id.toString();
+    const conversationId = [session.user.id, data.receiverId].sort().join('-');
+
+    // Get receiver's user document for notification preferences
+    const receiverUser = await User.findById(data.receiverId);
+    if (receiverUser && receiverUser.notificationPreferences?.newMessageNotifications) {
+      sendNewMessageNotification(
+        data.receiverId,
+        senderName,
+        data.content,
+        messageId,
+        conversationId
+      ).catch(console.error);
+    }
 
     return NextResponse.json({ message }, { status: 201 });
   } catch (error) {

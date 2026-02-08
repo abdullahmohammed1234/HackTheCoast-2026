@@ -1,5 +1,6 @@
 import mongoose, { Schema, Model } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { INotificationPreferences, defaultNotificationPreferences } from '@/types/notifications';
 
 export interface IUser {
   email: string;
@@ -14,6 +15,20 @@ export interface IUser {
   followingCount: number;
   totalSales: number;
   sustainableListings: number;
+  // Gamification fields
+  xp: number;
+  level: number;
+  streak: number;
+  lastActiveDate: Date;
+  achievements: string[];
+  impactStats: {
+    itemsReused: number;
+    wasteSaved: number;
+    co2Prevented: number;
+    waterSaved: number;
+    energySaved: number;
+  };
+  notificationPreferences: INotificationPreferences;
   createdAt: Date;
 }
 
@@ -89,6 +104,41 @@ const UserSchema = new Schema<IUser, UserModel>(
       type: Number,
       default: 0,
       min: 0,
+    },
+    // Gamification fields
+    xp: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    level: {
+      type: Number,
+      default: 1,
+      min: 1,
+    },
+    streak: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    lastActiveDate: {
+      type: Date,
+      default: Date.now,
+    },
+    achievements: {
+      type: [String],
+      default: [],
+    },
+    impactStats: {
+      itemsReused: { type: Number, default: 0 },
+      wasteSaved: { type: Number, default: 0 },
+      co2Prevented: { type: Number, default: 0 },
+      waterSaved: { type: Number, default: 0 },
+      energySaved: { type: Number, default: 0 },
+    },
+    notificationPreferences: {
+      type: Object,
+      default: defaultNotificationPreferences,
     },
   },
   {

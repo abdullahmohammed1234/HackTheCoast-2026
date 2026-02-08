@@ -3,8 +3,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import Listing from '@/models/Listing';
+import Wishlist from '@/models/Wishlist';
+import User from '@/models/User';
 import { rateLimit, rateLimitConfigs } from '@/lib/rate-limit';
 import { sanitizeString, sanitizeUrl } from '@/lib/sanitize';
+import { sendNewListingNotification, sendWishlistMatchNotification } from '@/lib/notifications';
 
 export async function GET(req: NextRequest) {
   // Apply rate limiting
@@ -204,6 +207,45 @@ export async function POST(req: NextRequest) {
     });
 
     await listing.populate('userId', 'name email');
+
+    // Notify users with wishlist items in the same category
+    const wishlists = await Wishlist.find({
+      'items.listingId': { $exists: true }
+    }).populate({
+      path: 'items.listingId',
+      select: 'category'
+    });
+
+    const notifiedUsers = new Set<string>();
+    
+    for (const wishlist of wishlists) {
+      const userId = wishlist.userId.toString();
+      
+      // Don't notify the listing creator
+      if (userId === session.user.id) continue;
+      
+      // Don't notify the same user twice
+      if (notifiedUsers.has(userId)) continue;
+      
+      // Check if any of user's wishlist items are in the same category
+      const wishlistItems = wishlist.items as any[];
+      const hasMatchingCategory = wishlistItems.some(
+        item => item.listingId?.category === data.category
+      );
+      
+      if (hasMatchingCategory) {
+        const user = await User.findById(userId);
+        if (user?.notificationPreferences?.wishlistMatchNotifications) {
+          sendWishlistMatchNotification(
+            userId,
+            data.title,
+            data.price ? parseFloat(data.price) : 0,
+            listing._id.toString()
+          ).catch(console.error);
+        }
+        notifiedUsers.add(userId);
+      }
+    }
 
     return NextResponse.json({ listing }, { status: 201 });
   } catch (error: any) {

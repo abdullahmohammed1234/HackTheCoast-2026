@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
         id: user._id.toString(),
         name: user.name,
         email: user.email,
+        avatar: user.avatar,
         createdAt: user.createdAt,
       },
       listings: listings.map(listing => ({
