@@ -1,14 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
   MapPinIcon,
   CalendarIcon,
   TagIcon,
-  CubeIcon
+  CubeIcon,
+  HeartIcon
 } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { format } from 'date-fns';
+import { useSession } from 'next-auth/react';
 
 interface ListingCardProps {
   listing: {
@@ -25,14 +29,20 @@ interface ListingCardProps {
     isMoveOutBundle: boolean;
     userId?: { name: string };
   };
+  isFavorite?: boolean;
+  onToggleFavorite?: (listingId: string) => void;
 }
 
-export default function ListingCard({ listing }: ListingCardProps) {
+export default function ListingCard({ listing, isFavorite = false, onToggleFavorite }: ListingCardProps) {
+  const { data: session } = useSession();
+  const [localFavorite, setLocalFavorite] = useState(isFavorite);
+  const [isToggling, setIsToggling] = useState(false);
+
   const priceDisplay = listing.isFree 
     ? 'FREE' 
     : listing.isTrade 
     ? 'Trade' 
-    : `$${listing.price}`;
+    : `${listing.price}`;
 
   const priceColor = listing.isFree 
     ? 'bg-green-100 text-green-700' 
@@ -44,9 +54,41 @@ export default function ListingCard({ listing }: ListingCardProps) {
     ? 'bg-gradient-to-r from-ubc-red to-red-600' 
     : 'bg-gradient-to-r from-ubc-blue to-blue-500';
 
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!session) {
+      window.location.href = '/login';
+      return;
+    }
+
+    if (isToggling) return;
+    setIsToggling(true);
+
+    const newFavoriteState = !localFavorite;
+    setLocalFavorite(newFavoriteState);
+
+    try {
+      const method = newFavoriteState ? 'POST' : 'DELETE';
+      const res = await fetch(`/api/wishlist?listingId=${listing._id}`, { method });
+      
+      if (!res.ok) {
+        setLocalFavorite(!newFavoriteState);
+      } else if (onToggleFavorite) {
+        onToggleFavorite(listing._id);
+      }
+    } catch (error) {
+      setLocalFavorite(!newFavoriteState);
+      console.error('Failed to toggle favorite:', error);
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
   return (
     <Link href={`/listings/${listing._id}`}>
-      <div className="card-modern group h-full">
+      <div className="card-modern group h-full relative">
         <div className="relative h-52 bg-gray-100 overflow-hidden">
           {listing.imageUrl ? (
             <Image
@@ -65,6 +107,24 @@ export default function ListingCard({ listing }: ListingCardProps) {
           {/* Overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           
+          {/* Favorite Button */}
+          <button
+            onClick={handleFavoriteClick}
+            disabled={isToggling}
+            className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 ${
+              localFavorite 
+                ? 'bg-red-500 text-white shadow-md' 
+                : 'bg-white/90 backdrop-blur-sm text-gray-500 hover:text-red-500 shadow-sm'
+            } ${isToggling ? 'opacity-50 cursor-not-allowed' : ''}`}
+            title={localFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            {localFavorite ? (
+              <HeartIconSolid className="h-5 w-5" />
+            ) : (
+              <HeartIcon className="h-5 w-5" />
+            )}
+          </button>
+          
           {/* Move-Out Badge */}
           {listing.isMoveOutBundle && (
             <div className={`absolute top-3 left-3 ${badgeColor} text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-md`}>
@@ -76,7 +136,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           )}
           
           {/* Category Badge */}
-          <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm">
+          <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm">
             <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-1">
               <TagIcon className="h-3 w-3 text-ubc-blue" />
               {listing.category}
@@ -84,7 +144,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </div>
           
           {/* Price Badge */}
-          <div className={`absolute bottom-3 right-3 ${priceColor} text-sm font-bold px-4 py-2 rounded-xl shadow-md`}>
+          <div className={`${priceColor} text-sm font-bold px-4 py-2 rounded-xl shadow-md absolute bottom-3 right-3`}>
             {priceDisplay}
           </div>
         </div>

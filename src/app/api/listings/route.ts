@@ -27,10 +27,14 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get('category');
     const location = searchParams.get('location');
+    const condition = searchParams.get('condition');
     const minPrice = searchParams.get('minPrice');
     const maxPrice = searchParams.get('maxPrice');
     const moveOutMode = searchParams.get('moveOutMode') === 'true';
     const search = searchParams.get('search');
+    const dateFrom = searchParams.get('dateFrom');
+    const dateTo = searchParams.get('dateTo');
+    const sortBy = searchParams.get('sortBy') || 'newest';
 
     const query: any = {};
 
@@ -40,6 +44,10 @@ export async function GET(req: NextRequest) {
 
     if (location && location !== 'all') {
       query.location = location;
+    }
+
+    if (condition && condition !== 'all') {
+      query.condition = condition;
     }
 
     if (minPrice) {
@@ -54,6 +62,14 @@ export async function GET(req: NextRequest) {
       query.isMoveOutBundle = true;
     }
 
+    if (dateFrom) {
+      query.availableDate = { ...query.availableDate, $gte: new Date(dateFrom) };
+    }
+
+    if (dateTo) {
+      query.availableDate = { ...query.availableDate, $lte: new Date(dateTo) };
+    }
+
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -61,10 +77,29 @@ export async function GET(req: NextRequest) {
       ];
     }
 
+    // Determine sort order
+    let sortOptions: any = { createdAt: -1 };
+    switch (sortBy) {
+      case 'oldest':
+        sortOptions = { createdAt: 1 };
+        break;
+      case 'price-low':
+        sortOptions = { price: 1, createdAt: -1 };
+        break;
+      case 'price-high':
+        sortOptions = { price: -1, createdAt: -1 };
+        break;
+      case 'title':
+        sortOptions = { title: 1, createdAt: -1 };
+        break;
+      default:
+        sortOptions = { createdAt: -1 };
+    }
+
     const listings = await Listing.find(query)
       .populate('userId', 'name email')
       .populate('bundleId', 'title')
-      .sort({ createdAt: -1 });
+      .sort(sortOptions);
 
     return NextResponse.json({ listings });
   } catch (error) {
@@ -109,6 +144,7 @@ export async function POST(req: NextRequest) {
       imageUrl: sanitizeUrl(rawData.imageUrl),
       imageUrls: rawData.imageUrls || [],
       price: rawData.price,
+      condition: rawData.condition || 'good',
       isFree: rawData.isFree || false,
       isTrade: rawData.isTrade || false,
       isMoveOutBundle: rawData.isMoveOutBundle || false,
@@ -139,6 +175,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Price is required when not free or trade' }, { status: 400 });
     }
 
+    // Validate condition
+    const validConditions = ['new', 'like-new', 'good', 'fair', 'used'];
+    if (data.condition && !validConditions.includes(data.condition)) {
+      return NextResponse.json({ error: 'Invalid condition' }, { status: 400 });
+    }
+
     const listing = await Listing.create({
       title: data.title,
       description: data.description,
@@ -147,6 +189,7 @@ export async function POST(req: NextRequest) {
       isTrade: data.isTrade,
       category: data.category,
       location: data.location,
+      condition: data.condition,
       availableDate: new Date(data.availableDate),
       imageUrl: data.imageUrl,
       imageUrls: data.imageUrls,

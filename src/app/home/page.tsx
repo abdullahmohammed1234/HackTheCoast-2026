@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, FunnelIcon, ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { CubeIcon, AcademicCapIcon, MapPinIcon, GlobeAltIcon } from '@heroicons/react/24/solid';
 import { SparklesIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
@@ -33,6 +33,11 @@ export default function HomePage() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [location, setLocation] = useState('all');
+  const [condition, setCondition] = useState('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+  const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Debounced search
@@ -41,11 +46,11 @@ export default function HomePage() {
       fetchListings();
     }, 300);
     return () => clearTimeout(timer);
-  }, [moveOutMode, category, location]);
+  }, [moveOutMode, category, location, condition, dateFrom, dateTo, sortBy]);
 
   useEffect(() => {
     debouncedFetchListings();
-  }, [search, moveOutMode, category, location, debouncedFetchListings]);
+  }, [search, moveOutMode, category, location, condition, dateFrom, dateTo, sortBy, debouncedFetchListings]);
 
   const fetchListings = async () => {
     try {
@@ -53,6 +58,10 @@ export default function HomePage() {
       if (moveOutMode) params.set('moveOutMode', 'true');
       if (category !== 'all') params.set('category', category);
       if (location !== 'all') params.set('location', location);
+      if (condition !== 'all') params.set('condition', condition);
+      if (dateFrom) params.set('dateFrom', dateFrom);
+      if (dateTo) params.set('dateTo', dateTo);
+      if (sortBy !== 'newest') params.set('sortBy', sortBy);
       if (search) params.set('search', search);
 
       const res = await fetch(`/api/listings?${params}`);
@@ -65,14 +74,24 @@ export default function HomePage() {
     }
   };
 
+  const clearFilters = () => {
+    setCondition('all');
+    setDateFrom('');
+    setDateTo('');
+    setSortBy('newest');
+  };
+
+  const hasActiveFilters = condition !== 'all' || dateFrom || dateTo || sortBy !== 'newest';
+
   const categories = ['all', 'Dorm', 'Electronics', 'Textbooks', 'Furniture', 'Clothing', 'Appliances', 'Other'];
   const locations = ['all', 'Gage', 'Totem', 'Vanier', 'Orchard', 'Marine', 'Kitsilano', 'Thunderbird'];
-
-  const stats = [
-    { value: '500+', label: 'Active Students', icon: AcademicCapIcon },
-    { value: '200+', label: 'Items Listed', icon: CubeIcon },
-    { value: '8', label: 'Residences', icon: MapPinIcon },
-    { value: '50kg+', label: 'Waste Saved', icon: GlobeAltIcon }
+  const conditions = ['all', 'new', 'like-new', 'good', 'fair', 'used'];
+  const sortOptions = [
+    { value: 'newest', label: 'Newest First' },
+    { value: 'oldest', label: 'Oldest First' },
+    { value: 'price-low', label: 'Price: Low to High' },
+    { value: 'price-high', label: 'Price: High to Low' },
+    { value: 'title', label: 'Title A-Z' },
   ];
 
   return (
@@ -162,7 +181,97 @@ export default function HomePage() {
                     </option>
                   ))}
                 </select>
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`input-modern flex items-center justify-center gap-2 ${showFilters ? 'bg-ubc-blue text-white' : ''}`}
+                >
+                  <FunnelIcon className="h-5 w-5" />
+                  <span className="hidden sm:inline">Filters</span>
+                  {hasActiveFilters && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
+                      ✓
+                    </span>
+                  )}
+                </button>
               </div>
+              
+              {/* Advanced Filters Panel */}
+              {showFilters && (
+                <div className="mt-4 pt-4 border-t border-gray-100 animate-fadeIn">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Condition Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Condition</label>
+                      <select
+                        value={condition}
+                        onChange={(e) => setCondition(e.target.value)}
+                        className="input-modern"
+                      >
+                        {conditions.map((cond) => (
+                          <option key={cond} value={cond}>
+                            {cond === 'all' ? 'Any Condition' : cond.charAt(0).toUpperCase() + cond.slice(1).replace('-', ' ')}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    {/* Date From */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Available From</label>
+                      <input
+                        type="date"
+                        value={dateFrom}
+                        onChange={(e) => setDateFrom(e.target.value)}
+                        className="input-modern"
+                      />
+                    </div>
+                    
+                    {/* Date To */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Available Until</label>
+                      <input
+                        type="date"
+                        value={dateTo}
+                        onChange={(e) => setDateTo(e.target.value)}
+                        className="input-modern"
+                      />
+                    </div>
+                    
+                    {/* Sort By */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                      <div className="relative">
+                        <select
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value)}
+                          className="input-modern appearance-none pr-10"
+                        >
+                          {sortOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        <ChevronDownIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Clear Filters Button */}
+                  {hasActiveFilters && (
+                    <div className="mt-4 flex justify-end">
+                      <button
+                        onClick={clearFilters}
+                        className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                      >
+                        <XMarkIcon className="h-4 w-4" />
+                        Clear All Filters
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <div className="mt-4">
                 <MoveOutToggle isEnabled={moveOutMode} onToggle={setMoveOutMode} />
               </div>
@@ -192,6 +301,9 @@ export default function HomePage() {
                   : 'Discover items from students across campus'}
               </p>
             </div>
+            <div className="text-sm text-gray-500">
+              {listings.length} {listings.length === 1 ? 'item' : 'items'} found
+            </div>
           </div>
 
           {/* Loading State with Skeletons */}
@@ -206,7 +318,7 @@ export default function HomePage() {
               type="listings"
               title="No listings found"
               description={
-                search || category !== 'all' || location !== 'all'
+                search || category !== 'all' || location !== 'all' || hasActiveFilters
                   ? 'Try adjusting your search or filters to find what you\'re looking for.'
                   : 'Be the first to list an item and start trading with fellow students!'
               }
@@ -225,3 +337,10 @@ export default function HomePage() {
     </div>
   );
 }
+
+const stats = [
+  { value: '500+', label: 'Active Students', icon: AcademicCapIcon },
+  { value: '200+', label: 'Items Listed', icon: CubeIcon },
+  { value: '8', label: 'Residences', icon: MapPinIcon },
+  { value: '50kg+', label: 'Waste Saved', icon: GlobeAltIcon }
+];

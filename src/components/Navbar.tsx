@@ -11,7 +11,9 @@ import {
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  HeartIcon,
+  BellIcon
 } from '@heroicons/react/24/outline';
 
 export default function Navbar() {
@@ -75,6 +77,20 @@ export default function Navbar() {
                 </Link>
                 
                 <div className="flex items-center gap-1 ml-4 border-l border-gray-200 pl-4">
+                  <Link
+                    href="/wishlist"
+                    className="p-2.5 text-gray-600 hover:text-ubc-blue hover:bg-ubc-blue/5 rounded-xl transition-colors"
+                    title="Wishlist"
+                  >
+                    <HeartIcon className="h-6 w-6" />
+                  </Link>
+                  <Link
+                    href="/price-alerts"
+                    className="p-2.5 text-gray-600 hover:text-ubc-blue hover:bg-ubc-blue/5 rounded-xl transition-colors"
+                    title="Price Alerts"
+                  >
+                    <BellIcon className="h-6 w-6" />
+                  </Link>
                   <Link
                     href="/messages"
                     className="p-2.5 text-gray-600 hover:text-ubc-blue hover:bg-ubc-blue/5 rounded-xl transition-colors"
@@ -171,6 +187,22 @@ export default function Navbar() {
                 >
                   <HomeIcon className="h-6 w-6" />
                   <span className="font-medium">Home</span>
+                </Link>
+                <Link
+                  href="/wishlist"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-ubc-blue hover:bg-ubc-blue/5 rounded-xl transition-colors"
+                >
+                  <HeartIcon className="h-6 w-6" />
+                  <span className="font-medium">Wishlist</span>
+                </Link>
+                <Link
+                  href="/price-alerts"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-ubc-blue hover:bg-ubc-blue/5 rounded-xl transition-colors"
+                >
+                  <BellIcon className="h-6 w-6" />
+                  <span className="font-medium">Price Alerts</span>
                 </Link>
                 <Link
                   href="/listings/create"
