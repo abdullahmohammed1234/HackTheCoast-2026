@@ -28,7 +28,6 @@ A UBC-only marketplace where students can buy, sell, and trade dorm items and st
 ### Notifications
 - **Push Notifications**: Real-time notifications for messages, offers, and price alerts
 - **Notification Preferences**: Customize which notifications you receive
-- **Email Digests**: Weekly email summaries of wishlist matches
 
 ### User Experience
 - **Sustainability Impact Dashboard**: Track your contribution to sustainability (items reused, CO₂ saved, waste avoided)
