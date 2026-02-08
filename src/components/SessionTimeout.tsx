@@ -25,8 +25,24 @@ export default function SessionTimeout() {
   const logout = useCallback(() => {
     // Clear session and redirect to login
     localStorage.removeItem('sessionActivity');
-    router.push('/login?expired=true');
-    toast.error('Session expired. Please log in again.');
+    
+    // Close the tab/window immediately
+    if (typeof window !== 'undefined') {
+      // Try to close the tab
+      window.close();
+      
+      // If window.close() doesn't work (browsers may block it), try alternative approaches
+      // Navigate away and try to close via other means
+      router.push('/login?expired=true');
+      
+      // Clear the warning state to hide the modal immediately
+      setShowWarning(false);
+      
+      // Try to use blur/focus tricks to close the tab
+      setTimeout(() => {
+        window.close();
+      }, 100);
+    }
   }, [router]);
 
   useEffect(() => {
