@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { DollarSign, Tag, MapPin, Calendar, Package, Loader2, CheckCircle, Save, Image as ImageIcon, X, Upload } from 'lucide-react';
+import { DollarSign, Tag, MapPin, Image as ImageIcon, Save, X, Upload } from 'lucide-react';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 
@@ -122,8 +122,6 @@ export default function CreateListingPage() {
       return;
     }
 
-    setLoading(true);
-
     try {
       const res = await fetch('/api/listings', {
         method: 'POST',
@@ -165,13 +163,7 @@ export default function CreateListingPage() {
                 />
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Please sign in to create a listing</h1>
-            <button
-              onClick={() => router.push('/login')}
-              className="px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
-            >
-              Sign In
-            </button>
+            <p className="text-gray-600">Please sign in to create a listing.</p>
           </div>
         </div>
       </div>
@@ -415,83 +407,23 @@ export default function CreateListingPage() {
             </div>
           </div>
 
-          {/* Availability */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-ubc-blue" />
-              Availability
-            </h2>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Available Until
-              </label>
-              <input
-                type="date"
-                value={formData.availableDate}
-                onChange={(e) => setFormData({ ...formData, availableDate: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Move-Out Bundle */}
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl shadow-sm border border-green-200 p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-green-100 rounded-xl">
-                <Package className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">Move-Out Bundle</h3>
-                <p className="text-sm text-gray-600">Help students find dorm essentials during move-out season</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.isMoveOutBundle}
-                  onChange={(e) => setFormData({ ...formData, isMoveOutBundle: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-300 peer-focus:ring-4 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-              </label>
-            </div>
-          </div>
-
-          {/* Benefits */}
-          <div className="grid grid-cols-3 gap-4 p-4 bg-gray-100 rounded-xl">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span>Free to list</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span>UBC verified</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span>Safe trading</span>
-            </div>
-          </div>
-
           {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading || uploading || imageUrls.length === 0}
-            className="w-full py-4 ubc-gradient text-white font-semibold rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
-                <span>Creating...</span>
-              </>
-            ) : (
-              <>
-                <Package className="h-5 w-5" />
-                <span>Create Listing</span>
-              </>
-            )}
-          </button>
+          <div className="flex justify-end gap-4">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading || uploading}
+              className="px-6 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Creating...' : 'Create Listing'}
+            </button>
+          </div>
         </form>
       </div>
     </div>
