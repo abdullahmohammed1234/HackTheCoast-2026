@@ -8,40 +8,40 @@ export default function Navbar() {
   const { data: session } = useSession();
 
   return (
-    <nav className="ubc-header-gradient shadow-md">
+    <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 ubc-gradient border-b border-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="ubc-gradient p-2 rounded-lg shadow-sm">
+            <Link href="/home" className="flex items-center gap-2">
+              <div className="bg-white/20 p-2 rounded-lg">
                 <Leaf className="h-6 w-6 text-white" />
               </div>
               <span className="text-xl font-bold text-white ubc-heading">Exchangify</span>
             </Link>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-2 text-white">
             {session ? (
               <>
                 <Link
                   href="/listings/create"
-                  className="flex items-center space-x-2 bg-white text-ubc-blue px-4 py-2 rounded-lg hover:bg-ubc-grayLight transition-colors font-medium shadow-sm"
+                  className="flex items-center gap-2 bg-white text-ubc-blue px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors"
                 >
                   <Plus className="h-4 w-4" />
                   <span>Sell Item</span>
                 </Link>
                 <Link
                   href="/messages"
-                  className="p-2 text-white hover:text-ubc-gold transition-colors"
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
                 >
                   <MessageCircle className="h-5 w-5" />
                 </Link>
                 <Link
                   href="/profile"
-                  className="flex items-center space-x-2 text-white hover:text-ubc-gold transition-colors"
+                  className="flex items-center gap-2 hover:bg-white/20 rounded-lg transition-colors p-2"
                 >
-                  <div className="p-2 bg-white/20 rounded-full">
-                    <User className="h-5 w-5 text-white" />
+                  <div className="bg-white/20 rounded-full p-1">
+                    <User className="h-5 w-5" />
                   </div>
                   <span className="text-sm hidden sm:block font-medium">
                     {session.user?.name}
@@ -49,7 +49,7 @@ export default function Navbar() {
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: '/' })}
-                  className="p-2 text-white hover:text-ubc-gold transition-colors"
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
                 >
                   <LogOut className="h-5 w-5" />
                 </button>
@@ -58,13 +58,13 @@ export default function Navbar() {
               <>
                 <Link
                   href="/login"
-                  className="text-white hover:text-ubc-gold font-medium transition-colors"
+                  className="font-medium hover:text-white/80 transition-colors px-4 py-2"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/signup"
-                  className="bg-white text-ubc-blue px-4 py-2 rounded-lg hover:bg-ubc-grayLight transition-colors font-medium shadow-sm"
+                  className="bg-white text-ubc-blue px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors"
                 >
                   Sign Up
                 </Link>
