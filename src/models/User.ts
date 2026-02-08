@@ -5,6 +5,15 @@ export interface IUser {
   email: string;
   name: string;
   password?: string;
+  avatar?: string;
+  bio?: string;
+  badges: string[];
+  rating: number;
+  reviewCount: number;
+  followersCount: number;
+  followingCount: number;
+  totalSales: number;
+  sustainableListings: number;
   createdAt: Date;
 }
 
@@ -12,7 +21,11 @@ interface IUserMethods {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-type UserModel = Model<IUser, {}, IUserMethods>;
+type UserModel = Model<IUser, {}, IUserAvailableMethods>;
+
+export interface IUserAvailableMethods {
+  comparePassword(candidatePassword: string): Promise<boolean>;
+}
 
 const UserSchema = new Schema<IUser, UserModel>(
   {
@@ -31,6 +44,51 @@ const UserSchema = new Schema<IUser, UserModel>(
     password: {
       type: String,
       select: false,
+    },
+    avatar: {
+      type: String,
+      default: '',
+    },
+    bio: {
+      type: String,
+      default: '',
+      maxLength: 500,
+    },
+    badges: {
+      type: [String],
+      default: [],
+      enum: ['Top Seller', 'Sustainable Hero', 'Quick Responder', 'Trusted Trader', 'Community Star'],
+    },
+    rating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+    reviewCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    followersCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    followingCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    totalSales: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    sustainableListings: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
   },
   {

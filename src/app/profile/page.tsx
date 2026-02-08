@@ -5,6 +5,10 @@ import { useSession, signIn, signOut } from 'next-auth/react';
 import { User, Settings, ShoppingBag, CreditCard, AlertCircle, ArrowLeft, Leaf, Package, HeartIcon, BellIcon } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import BadgeDisplay from '@/components/BadgeDisplay';
+import StarRating from '@/components/StarRating';
+import ReviewList from '@/components/ReviewList';
+import FavoriteButton from '@/components/FavoriteButton';
 
 interface Listing {
   id: string;
@@ -22,12 +26,23 @@ interface UserProfile {
   name: string;
   email: string;
   createdAt: string;
+  badges: string[];
+  rating: number;
+  reviewCount: number;
+  followersCount: number;
+  followingCount: number;
+  sustainableListings: number;
+  totalSales: number;
 }
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [listings, setListings] = useState<Listing[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [activeTab, setActiveTab] = useState<'listings' | 'reviews'>('listings');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,6 +66,23 @@ export default function ProfilePage() {
       const data = await response.json();
       setUser(data.user);
       setListings(data.listings);
+      
+      // Fetch reviews for the user
+      const reviewsResponse = await fetch(`/api/reviews?userId=${data.user.id}`);
+      if (reviewsResponse.ok) {
+        const reviewsData = await reviewsResponse.json();
+        setReviews(reviewsData.reviews);
+        setAverageRating(reviewsData.averageRating || 0);
+      }
+      
+      // Check if user is favorited by current session user
+      if (session?.user?.id && session.user.id !== data.user.id) {
+        const favResponse = await fetch('/api/favorites');
+        if (favResponse.ok) {
+          const favData = await favResponse.json();
+          setIsFavorited(favData.favorites.some((f: any) => f.favoriteUserId._id === data.user.id));
+        }
+      }
     } catch (err) {
       setError('Failed to load profile data');
     } finally {
@@ -141,6 +173,30 @@ export default function ProfilePage() {
               <h1 className="text-3xl md:text-4xl font-bold mb-2 ubc-heading">
                 {user?.name || 'Student'}
               </h1>
+              
+              {/* Badges */}
+              {user?.badges && user.badges.length > 0 && (
+                <div className="mb-2">
+                  <BadgeDisplay badges={user.badges} size="sm" showLabels />
+                </div>
+              )}
+              
+              {/* Rating */}
+              {user && user.rating > 0 && (
+                <div className="flex items-center gap-2 mb-2">
+                  <StarRating rating={user.rating} readonly size="sm" />
+                  <span className="text-sm text-white/90">
+                    ({user.reviewCount} review{user.reviewCount !== 1 ? 's' : ''})
+                  </span>
+                </div>
+              )}
+              
+              {/* Stats */}
+              <div className="flex items-center gap-4 text-sm text-white/80 mb-2">
+                <span>{user?.followersCount || 0} followers</span>
+                <span>{user?.followingCount || 0} following</span>
+              </div>
+              
               <p className="text-white/90 mb-2">{user?.email || ''}</p>
               <p className="text-white/70 text-sm">
                 Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : new Date().getFullYear()}
@@ -168,69 +224,109 @@ export default function ProfilePage() {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* My Listings */}
+            {/* Main Content */}
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                    <Package className="h-5 w-5 text-primary" />
-                    My Listings ({listings.length})
-                  </h2>
-                  <Link
-                    href="/listings/create"
-                    className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
-                  >
-                    + Add New
-                  </Link>
-                </div>
+              {/* Tabs */}
+              <div className="flex gap-4 mb-6">
+                <button
+                  onClick={() => setActiveTab('listings')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    activeTab === 'listings'
+                      ? 'bg-primary text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <Package className="h-4 w-4 inline mr-2" />
+                  Listings ({listings.length})
+                </button>
+                <button
+                  onClick={() => setActiveTab('reviews')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    activeTab === 'reviews'
+                      ? 'bg-primary text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <ShoppingBag className="h-4 w-4 inline mr-2" />
+                  Reviews ({reviews.length})
+                </button>
+              </div>
 
-                {listings.length === 0 ? (
-                  <div className="text-center py-12 bg-gray-50 rounded-xl">
-                    <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No listings yet</h3>
-                    <p className="text-gray-500 mb-4">You haven't listed any items for sale</p>
+              {activeTab === 'listings' ? (
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                      <Package className="h-5 w-5 text-primary" />
+                      My Listings
+                    </h2>
                     <Link
                       href="/listings/create"
-                      className="inline-flex items-center gap-2 text-primary font-semibold hover:underline"
+                      className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
                     >
-                      Create your first listing
-                      <ArrowLeft className="h-4 w-4 rotate-180" />
+                      + Add New
                     </Link>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {listings.map((item) => (
-                      <div
-                        key={item.id}
-                        className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition-shadow"
+
+                  {listings.length === 0 ? (
+                    <div className="text-center py-12 bg-gray-50 rounded-xl">
+                      <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No listings yet</h3>
+                      <p className="text-gray-500 mb-4">You haven't listed any items for sale</p>
+                      <Link
+                        href="/listings/create"
+                        className="inline-flex items-center gap-2 text-primary font-semibold hover:underline"
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 rounded-lg bg-gray-200 overflow-hidden flex-shrink-0">
-                            {item.imageUrl ? (
-                              <img
-                                src={item.imageUrl}
-                                alt={item.title}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                                <Package className="h-8 w-8 text-gray-400" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-gray-900 truncate">{item.title}</h3>
-                            <p className="text-lg font-bold text-primary">
-                              {item.isFree ? 'Free' : item.price ? `$${item.price}` : 'N/A'}
-                            </p>
-                            <p className="text-sm text-gray-500">{item.category}</p>
+                        Create your first listing
+                        <ArrowLeft className="h-4 w-4 rotate-180" />
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {listings.map((item) => (
+                        <div
+                          key={item.id}
+                          className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 rounded-lg bg-gray-200 overflow-hidden flex-shrink-0">
+                              {item.imageUrl ? (
+                                <img
+                                  src={item.imageUrl}
+                                  alt={item.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                  <Package className="h-8 w-8 text-gray-400" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-medium text-gray-900 truncate">{item.title}</h3>
+                              <p className="text-lg font-bold text-primary">
+                                {item.isFree ? 'Free' : item.price ? `$${item.price}` : 'N/A'}
+                              </p>
+                              <p className="text-sm text-gray-500">{item.category}</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                    <ShoppingBag className="h-5 w-5 text-primary" />
+                    Reviews
+                  </h2>
+                  <ReviewList
+                    reviews={reviews}
+                    averageRating={averageRating}
+                    totalReviews={reviews.length}
+                  />
+                </div>
+              )}
 
               {/* Purchase History */}
               <div className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -298,11 +394,15 @@ export default function ProfilePage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Items traded</span>
-                    <span className="font-semibold text-gray-900">0</span>
+                    <span className="font-semibold text-gray-900">{user?.totalSales || 0}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">CO₂ saved</span>
-                    <span className="font-semibold text-green-600">0kg</span>
+                    <span className="text-gray-600">Sustainable items</span>
+                    <span className="font-semibold text-green-600">{user?.sustainableListings || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Reviews received</span>
+                    <span className="font-semibold text-gray-900">{user?.reviewCount || 0}</span>
                   </div>
                 </div>
               </div>

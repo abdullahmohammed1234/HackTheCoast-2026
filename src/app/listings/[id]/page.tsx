@@ -6,6 +6,9 @@ import { useSession } from 'next-auth/react';
 import { MapPin, Calendar, User, ArrowLeft, MessageCircle, Package, Leaf, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import Navbar from '@/components/Navbar';
+import StarRating from '@/components/StarRating';
+import BadgeDisplay from '@/components/BadgeDisplay';
+import FavoriteButton from '@/components/FavoriteButton';
 
 interface Listing {
   _id: string;
@@ -20,7 +23,7 @@ interface Listing {
   imageUrl: string;
   imageUrls: string[];
   isMoveOutBundle: boolean;
-  userId: { _id: string; name: string; email: string };
+  userId: { _id: string; name: string; email: string; badges?: string[]; rating?: number; reviewCount?: number };
 }
 
 export default function ListingDetailPage() {
@@ -31,6 +34,7 @@ export default function ListingDetailPage() {
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isFavorited, setIsFavorited] = useState(false);
 
   useEffect(() => {
     fetchListing();
@@ -41,6 +45,15 @@ export default function ListingDetailPage() {
       const res = await fetch(`/api/listings/${params.id}`);
       const data = await res.json();
       setListing(data.listing);
+      
+      // Check if seller is favorited
+      if (session?.user?.id && data.listing?.userId?._id) {
+        const favRes = await fetch('/api/favorites');
+        if (favRes.ok) {
+          const favData = await favRes.json();
+          setIsFavorited(favData.favorites.some((f: any) => f.favoriteUserId._id === data.listing.userId._id));
+        }
+      }
     } catch (error) {
       console.error('Failed to fetch listing:', error);
     } finally {
@@ -208,19 +221,47 @@ export default function ListingDetailPage() {
                   <User className="h-5 w-5 text-white/80" />
                   <span>Seller: <strong>{listing.userId.name}</strong></span>
                 </div>
+                
+                {/* Seller Rating */}
+                {listing.userId.rating !== undefined && listing.userId.rating > 0 && (
+                  <div className="flex items-center gap-2 justify-center md:justify-start">
+                    <StarRating rating={listing.userId.rating} readonly size="sm" />
+                    <span className="text-sm text-white/80">
+                      ({listing.userId.reviewCount || 0} reviews)
+                    </span>
+                  </div>
+                )}
+                
+                {/* Seller Badges */}
+                {listing.userId.badges && listing.userId.badges.length > 0 && (
+                  <div className="flex items-center gap-2 justify-center md:justify-start">
+                    <BadgeDisplay badges={listing.userId.badges} size="sm" />
+                  </div>
+                )}
               </div>
 
-              <button
-                onClick={handleMessageSeller}
-                disabled={sendingMessage || (session?.user?.id === listing.userId._id)}
-                className="inline-flex items-center gap-2 bg-white text-ubc-blue px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <MessageCircle className="h-5 w-5" />
-                {sendingMessage ? 'Sending...' : 'Message Seller'}
-              </button>
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-4 mb-4">
+                <button
+                  onClick={handleMessageSeller}
+                  disabled={sendingMessage || (session?.user?.id === listing.userId._id)}
+                  className="inline-flex items-center gap-2 bg-white text-ubc-blue px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  {sendingMessage ? 'Sending...' : 'Message Seller'}
+                </button>
+                
+                {session?.user?.id !== listing.userId._id && (
+                  <FavoriteButton
+                    userId={listing.userId._id}
+                    initialIsFavorited={isFavorited}
+                    onToggle={setIsFavorited}
+                  />
+                )}
+              </div>
 
               {session?.user?.id === listing.userId._id && (
-                <p className="mt-4 text-white/70 text-sm">
+                <p className="text-white/70 text-sm">
                   This is your listing
                 </p>
               )}
