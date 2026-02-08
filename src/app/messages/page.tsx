@@ -3,9 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import Image from 'next/image';
 import { MessageCircle, Send, ArrowLeft, User } from 'lucide-react';
+import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import Navbar from '@/components/Navbar';
+import EmptyState from '@/components/EmptyState';
+import Skeleton from '@/components/Skeleton';
 
 interface Message {
   _id: string;
@@ -20,6 +24,7 @@ export default function MessagesPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -37,6 +42,8 @@ export default function MessagesPage() {
       setMessages(data.messages || []);
     } catch (error) {
       console.error('Failed to fetch messages:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -112,22 +119,31 @@ export default function MessagesPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-ubc-blue to-ubc-blue opacity-95" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM2djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-white/80 hover:text-white mb-6"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            Back
-          </button>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              <span className="hidden sm:inline">Back</span>
+            </button>
+          </div>
 
           <div className="text-center text-white">
             <div className="inline-flex items-center justify-center mb-4">
-              <div className="ubc-gradient p-3 rounded-xl shadow-lg">
-                <MessageCircle className="h-10 w-10 text-white" />
+                <div className="bg-white/10 backdrop-blur-sm p-3 rounded-2xl shadow-lg">
+                  <div className="relative w-10 h-10">
+                    <Image
+                      src="/logo.webp"
+                      alt="Exchangify Logo"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 ubc-heading">
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">
               Messages
             </h1>
             <p className="text-lg text-white/90">
@@ -151,11 +167,25 @@ export default function MessagesPage() {
             <div className="grid md:grid-cols-3 min-h-[500px]">
               {/* Conversations List */}
               <div className="border-r border-gray-200 bg-gray-50">
-                {conversations.length === 0 ? (
-                  <div className="p-6 text-center text-gray-500">
-                    <MessageCircle className="h-8 w-8 mx-auto mb-2" />
-                    <p>No messages yet</p>
-                    <p className="text-sm mt-2">Start a conversation by messaging a listing!</p>
+                {loading ? (
+                  <div className="p-4 space-y-3">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3">
+                        <Skeleton variant="circular" width="40px" height="40px" />
+                        <div className="flex-1">
+                          <Skeleton variant="text" width="60%" height="16px" />
+                          <Skeleton variant="text" width="80%" height="14px" className="mt-1" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : conversations.length === 0 ? (
+                  <div className="p-6">
+                    <EmptyState
+                      type="messages"
+                      actionLabel="Browse Listings"
+                      actionHref="/home"
+                    />
                   </div>
                 ) : (
                   conversations.map((conv) => (

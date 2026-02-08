@@ -10,7 +10,7 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 353 85% 53%; /* UBC Thunderbird Red */
+    --primary: 353 85% 53%;
     --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -23,7 +23,7 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 353 85% 53%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 
   .dark {
@@ -51,27 +51,177 @@
 
 /* UBC-Themed Gradients */
 .ubc-gradient {
-  background: linear-gradient(135deg, #E31837 0%, #002145 100%);
+  background: linear-gradient(135deg, #002145 0%, #0055A4 50%, #E31837 100%);
 }
 
 .ubc-gradient-subtle {
-  background: linear-gradient(180deg, #F4F4F4 0%, #FFFFFF 100%);
+  background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
 }
 
 .ubc-header-gradient {
-  background: linear-gradient(90deg, #002145 0%, #0055A4 50%, #002145 100%);
+  background: linear-gradient(135deg, #002145 0%, #0055A4 100%);
 }
 
-/* UBC Typography */
-.ubc-heading {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+.ubc-gradient-text {
+  background: linear-gradient(135deg, #002145 0%, #E31837 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.ubc-body {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-weight: 400;
+/* Modern Card Styles */
+.card-modern {
+  @apply bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300;
+}
+
+.card-modern:hover {
+  @apply shadow-lg border-gray-200;
+  transform: translateY(-2px);
+}
+
+.card-modern-inner {
+  @apply bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-100 p-6 transition-all duration-300;
+}
+
+.card-modern-inner:hover {
+  @apply shadow-lg border-primary/20;
+  transform: translateY(-2px);
+}
+
+/* Button Styles */
+.btn-primary {
+  @apply inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-ubc-blue to-primary text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98];
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center px-6 py-3 bg-white text-ubc-blue font-semibold rounded-xl border-2 border-ubc-blue transition-all duration-300 hover:bg-ubc-blue hover:text-white;
+}
+
+.btn-ghost {
+  @apply inline-flex items-center justify-center px-4 py-2 text-gray-600 font-medium rounded-lg transition-all duration-200 hover:bg-gray-100 hover:text-gray-900;
+}
+
+/* Input Styles */
+.input-modern {
+  @apply w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary;
+}
+
+/* Badge Styles */
+.badge-primary {
+  @apply inline-flex items-center px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full;
+}
+
+.badge-secondary {
+  @apply inline-flex items-center px-3 py-1 bg-ubc-blue/10 text-ubc-blue text-xs font-semibold rounded-full;
+}
+
+.badge-success {
+  @apply inline-flex items-center px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full;
+}
+
+/* Navbar Styles */
+.navbar-glass {
+  @apply fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/80 border-b border-gray-100 transition-all duration-300;
+}
+
+.navbar-glass.scrolled {
+  @apply shadow-lg bg-white/95;
+}
+
+/* Typography */
+.heading-1 {
+  @apply text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900;
+}
+
+.heading-2 {
+  @apply text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-gray-900;
+}
+
+.heading-3 {
+  @apply text-xl md:text-2xl font-semibold tracking-tight text-gray-900;
+}
+
+.text-body {
+  @apply text-base text-gray-600 leading-relaxed;
+}
+
+/* Section Styles */
+.section-padding {
+  @apply py-12 md:py-16 lg:py-20;
+}
+
+.section-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Grid Layouts */
+.grid-listings {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+/* Utility Classes */
+.text-balance {
+  text-wrap: balance;
+}
+
+.truncate-2-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.truncate-3-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 @layer base {
@@ -79,6 +229,6 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
 }
