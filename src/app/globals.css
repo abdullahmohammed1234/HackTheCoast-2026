@@ -82,7 +82,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-.ubc-gradient {
-  background: linear-gradient(135deg, #E31837 0%, #002145 100%);
-}
